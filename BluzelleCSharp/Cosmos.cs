@@ -1,9 +1,12 @@
 ﻿using System;
 using System.IO.Compression;
 using System.Linq;
+using System.Text.Encodings.Web;
+using System.Threading.Tasks;
 using BluzelleCSharp.Models;
 using NBitcoin;
 using NBitcoin.Crypto;
+using Newtonsoft.Json.Linq;
 using RestSharp;
 using RestSharp.Authenticators;
 using RestSharp.Serializers.NewtonsoftJson;
@@ -18,7 +21,7 @@ namespace BluzelleCSharp
         public const int RetryInterval = 1000;
         public const int MaxRetries = 10;
 
-        private RestClient restClient;
+        protected RestClient restClient;
 
         protected string sessionAccount = "0";
         protected string sessionSequence;   
@@ -41,8 +44,6 @@ namespace BluzelleCSharp
 
             restClient = new RestClient(Endpoint);
             restClient.UseNewtonsoftJson();
-
-            Query("node_info");
         }
 
         protected static Key MnemonicToPrivateKey(string mnemonic)
@@ -56,10 +57,9 @@ namespace BluzelleCSharp
             return new Bech32(Bech32Prefix).Encode(Hashes.RIPEMD160(z, z.Length));
         }
 
-        async public void Query(string query)
+        public async Task<T> Query<T>(string query)
         {
-            var response = await restClient.GetAsync<Responce<object>>(new RestRequest(query, DataFormat.Json));
-            Console.WriteLine(response.result);
+            return (await restClient.GetAsync<Responce<T>>(new RestRequest(UrlEncoder.Default.Encode(query), DataFormat.Json))).result;
         }
         
         

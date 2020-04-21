@@ -1,9 +1,89 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using BluzelleCSharp.Models;
+using Newtonsoft.Json.Linq;
+using RestSharp;
+
 namespace BluzelleCSharp
 {
     public class BluzelleAPI : Cosmos
     {
-        public BluzelleAPI(string namespaceId, string mnemonic, string address = null, string endpoint = "http://testnet.public.bluzelle.com:1317") : base(namespaceId, mnemonic, address, endpoint) { }
+        private const string CrudServicePrefix = "crud";
+        private const int BlockTimeInSeconds = 5;
         
-        // async public bool hasKey()
+        public BluzelleAPI(
+            string namespaceId,
+            string mnemonic,
+            string address = null,
+            string endpoint = "http://testnet.public.bluzelle.com:1317")
+            : base(namespaceId, mnemonic, address, endpoint)
+        {
+        }
+
+        public async Task TestRun()
+        {
+
+        }
+
+        public async Task<bool> HasKey(string id)
+        {
+            return (bool) (await Query<JObject>($"{CrudServicePrefix}/has/{NamespaceId}/{id}"))["has"];
+        }
+
+        public async Task<List<string>> ListKeys()
+        {
+            return (await Query<JObject>($"{CrudServicePrefix}/keys/{NamespaceId}"))["keys"]
+                ?.ToObject<List<string>>();
+        }
+        public async Task<int> CountKeys()
+        {
+            return (int) (await Query<JObject>($"{CrudServicePrefix}/count/{NamespaceId}"))["count"];
+        }
+
+        public async Task<Dictionary<string, string>> GetKeyVal()
+        {
+            var res = (await Query<JObject>($"{CrudServicePrefix}/keyvalues/{NamespaceId}"));
+            return (res["keyvalues"] ?? throw new Exception("Failed to get KV list"))
+                .Aggregate(
+                    new Dictionary<string, string>(),
+                    (cur, next) =>
+                    {
+                        cur.Add(((string) next["key"])!, (string) next["value"]);
+                        return cur;
+                    });
+        }
+
+        public async Task<int> GetLease(string key)
+        {
+            return (int) (await Query<JObject>($"{CrudServicePrefix}/getlease/{NamespaceId}/{key}"))["lease"] 
+                   * BlockTimeInSeconds;
+        }
+        
+        public async Task<Dictionary<string, int>> GetNShortestLease(int n)
+        {
+            var res = await Query<JObject>($"{CrudServicePrefix}/getnshortestlease/{NamespaceId}/{n}");
+            return (res["keyleases"] ?? throw new Exception("Failed to get leases list"))
+                .Aggregate(
+                    new Dictionary<string, int>(),
+                    (cur, next) =>
+                    {
+                        cur.Add(((string) next["key"])!, (int) next["lease"] * BlockTimeInSeconds);
+                        return cur;
+                    });
+        }
+
+        public async Task<Account.AccountData> GetAccount(string address)
+        {
+            return Query<Account>($"auth/accounts/{address}").Result.value;
+        }
+        
+        public async Task<string> GetVersion()
+        {
+            return (string) restClient
+                .GetAsync<JObject>(new RestRequest("node_info", DataFormat.Json))
+                .Result["application_version"]?["version"];
+        }
     }
 }
