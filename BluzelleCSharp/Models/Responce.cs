@@ -4,6 +4,6 @@ namespace BluzelleCSharp.Models
 {
     public class Responce<T>
     {
-        public T result { get; set; }
+        public T Result;
     }
 }

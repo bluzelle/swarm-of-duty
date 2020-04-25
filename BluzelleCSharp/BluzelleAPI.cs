@@ -10,21 +10,16 @@ namespace BluzelleCSharp
 {
     public class BluzelleAPI : Cosmos
     {
-        private const string CrudServicePrefix = "crud";
-        private const int BlockTimeInSeconds = 5;
-        
-        public BluzelleAPI(
-            string namespaceId,
-            string mnemonic,
-            string address = null,
-            string endpoint = "http://testnet.public.bluzelle.com:1317")
-            : base(namespaceId, mnemonic, address, endpoint)
+        public const int BlockTimeInSeconds = 5;
+
+        public BluzelleAPI(string namespaceId, string mnemonic, string address = null, string chainId = "bluzelle", string endpoint = "http://testnet.public.bluzelle.com:1317") : base(namespaceId, mnemonic, address, chainId, endpoint)
         {
         }
 
         public async Task TestRun()
         {
-
+            //var res = GetAccount(sessionAddress).Result;
+            //Console.WriteLine(res.Address);
         }
 
         public async Task<bool> HasKey(string id)
@@ -76,14 +71,12 @@ namespace BluzelleCSharp
 
         public async Task<Account.AccountData> GetAccount(string address)
         {
-            return Query<Account>($"auth/accounts/{address}").Result.value;
+            return Query<Account>($"auth/accounts/{address}").Result.Value;
         }
         
         public async Task<string> GetVersion()
         {
-            return (string) restClient
-                .GetAsync<JObject>(new RestRequest("node_info", DataFormat.Json))
-                .Result["application_version"]?["version"];
+            return (string) Query("node_info").Result["application_version"]?["version"];
         }
     }
 }

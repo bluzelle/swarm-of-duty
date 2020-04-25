@@ -1,4 +1,8 @@
 // ReSharper disable InconsistentNaming
+
+using BluzelleCSharp.Models;
+using Newtonsoft.Json.Linq;
+
 namespace BluzelleCSharp
 {
     public class Transaction
@@ -6,27 +10,61 @@ namespace BluzelleCSharp
         public Transaction(
             string type,
             string ep,
-            object data,
-            int gasPrice,
-            int maxGas = 0,
-            int maxFee = 0,
+            string from,
+            string chain_id,
+            string owner,
+            string uuid,
+            GasInfo gasInfo,
             int retriesLeft = Cosmos.MaxRetries)
         {
+            retries_left = retriesLeft;
             this.type = type;
             this.ep = ep;
-            this.data = data;
-            gas_price = gasPrice;
-            max_gas = maxGas;
-            max_fee = maxFee;
-            retries_left = retriesLeft;
+            // gasInfo ??= GasInfo.Default;
+            // gas_price = gasInfo.GasPrice;
+            // max_gas = gasInfo.MaxGas;
+            // max_fee = gasInfo.MaxFee;
+
+            data = new JObject
+            {
+                ["BaseReq"] = new JObject {["from"] = @from, ["chain_id"] = chain_id},
+                ["UUID"] = uuid,
+                ["Owner"] = owner
+            };
         }
 
-        public string type { get; set; }
-        public string ep { get; set; }
-        public object data { get; set; }
-        public int gas_price { get; set; }
-        public int max_gas { get; set; }
-        public int max_fee { get; set; }
-        public int retries_left { get; set; }
+        // public class TransactionDataBaseReq
+        // {
+        //     public string From;
+        //     public string ChainId;
+        //
+        //     public TransactionDataBaseReq(string @from, string chainId)
+        //     {
+        //         From = @from;
+        //         ChainId = chainId;
+        //     }
+        // }
+        //
+        // public class TransactionData
+        // {
+        //     TransactionDataBaseReq BaseReq;
+        //     public string UUID;
+        //     public string Owner;
+        //
+        //     public TransactionData(string uuid, string owner, string from, string chain_id)
+        //     {
+        //         UUID = uuid;
+        //         Owner = owner;
+        //         BaseReq = new TransactionDataBaseReq(from, chain_id);
+        //     }
+        // }
+
+        public JObject data;
+        public int retries_left;
+        public int gas_price;
+        public int max_gas;
+        public int max_fee;
+        public string type;
+        public string ep;
     }
 }

@@ -6,7 +6,9 @@ using System.Threading.Tasks;
 using BluzelleCSharp.Models;
 using NBitcoin;
 using NBitcoin.Crypto;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using Newtonsoft.Json.Serialization;
 using RestSharp;
 using RestSharp.Authenticators;
 using RestSharp.Serializers.NewtonsoftJson;
@@ -15,9 +17,11 @@ namespace BluzelleCSharp
 {
     public class Cosmos
     {
+        protected const string CrudServicePrefix = "crud";
+
         private const string Bip32Path = "m/44'/118'/0'/0/0";
         private const string Bech32Prefix = "bluzelle";
-        private const string TokenName = "ubnt";
+        public const string TokenName = "ubnt";
         public const int RetryInterval = 1000;
         public const int MaxRetries = 10;
 
@@ -30,20 +34,34 @@ namespace BluzelleCSharp
 
         protected string NamespaceId;
         protected string Endpoint;
+        public string ChainId;
         
         public Cosmos(
             string namespaceId,
             string mnemonic,
             string address=null,
+            string chainId="bluzelle",
             string endpoint="http://testnet.public.bluzelle.com:1317")
         {
+            ChainId = chainId;
             NamespaceId = namespaceId;
             Endpoint = endpoint;
             sessionPk = MnemonicToPrivateKey(mnemonic);
             sessionAddress = string.IsNullOrEmpty(address) ? GetAddress(sessionPk.PubKey) : address;
 
             restClient = new RestClient(Endpoint);
-            restClient.UseNewtonsoftJson();
+            restClient.UseNewtonsoftJson(new JsonSerializerSettings
+            {
+                ContractResolver =  new DefaultContractResolver
+                {
+                    NamingStrategy = new SnakeCaseNamingStrategy()
+                },
+                NullValueHandling = NullValueHandling.Ignore
+            });
+
+            var result = SendTransaction(new JObject {
+                ["Key"] = "a"
+            }, "post", "read", new GasInfo(0, 0, 0)).Result;
         }
 
         protected static Key MnemonicToPrivateKey(string mnemonic)
@@ -59,19 +77,46 @@ namespace BluzelleCSharp
 
         public async Task<T> Query<T>(string query)
         {
-            return (await restClient.GetAsync<Responce<T>>(new RestRequest(UrlEncoder.Default.Encode(query), DataFormat.Json))).result;
+            return (await restClient.GetAsync<Responce<T>>(
+                new RestRequest(UrlEncoder.Default.Encode(query), DataFormat.Json))).Result;
         }
         
+        public async Task<JObject> Query(string query)
+        {
+            return await restClient.GetAsync<JObject>(
+                new RestRequest(UrlEncoder.Default.Encode(query), DataFormat.Json));
+        }
+
+        public async Task<int> SendTransaction(JObject data, string type, string cmd, GasInfo gasInfo=null)
+        {
+            data.Merge(new JObject
+            {
+                ["BaseReq"] = new JObject {["from"] = sessionAddress, ["chain_id"] = ChainId},
+                ["UUID"] = NamespaceId,
+                ["Owner"] = sessionAddress,
+            });
+            data.Merge(gasInfo);
+            
+            var methodValid = Enum.TryParse<Method>(type, true, out var httpMethod);
+            if(!methodValid) throw new Exception($"HTTP method {type} is unsupported");
+
+            var request = new RestRequest($"{CrudServicePrefix}/{cmd}", httpMethod, DataFormat.Json)
+                .AddParameter("application/x-www-form-urlencoded", data, ParameterType.RequestBody);
+
+            var tx = restClient.PostAsync<JObject>(request).Result;
+            
+            gasInfo?.UpdateTransaction(tx);
+
+            // tx["value"]!["memo"] = Utils.MakeRandomString(32);
+            // tx["value"]!["signature"] = JObject.FromObject(SignTransaction(tx));
+            // tx["value"]!["signatures"] = new JArray {tx["value"]["signature"]!};
+            
+            
+            
+            return 0;
+        }
+
         
         
-        // public Transaction SignTransaction(Key pk, object data, string chain_id)
-        // {
-        //     Payload payload = new Payload(
-        //         sessionAccount,
-        //         chain_id,
-        //         ,
-        //         data.value.memo,
-        //         );
-        // }
     }
 }
