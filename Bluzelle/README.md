@@ -1,5 +1,6 @@
 # Bluzelle Wallet
-This Flutter based application aims to facilitate the delegation and governance process of Bluzelle's testnet.
+This Flutter based application aims to facilitate the delegation and governance process of Bluzelle's testnet. </br>
+You can find apk of the app [here](https://github.com/Abhimanyu121/Bluzelle/releases/tag/Alpha-1).
 ## Feature List
 ### Staking
 1. Stake BNT to a validator.
