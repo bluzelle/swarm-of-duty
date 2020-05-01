@@ -1,7 +1,9 @@
 import 'dart:convert';
 import 'package:bluzelle/Models/BalanceWrapper.dart';
 import 'package:bluzelle/Models/BondedNotBondedWrapper.dart';
+import 'package:bluzelle/Models/SendTokenModel.dart';
 import 'package:bluzelle/Models/ValidatorList.dart';
+import 'package:bluzelle/Screens/SendToken.dart';
 import 'package:bluzelle/Utils/BNT.dart';
 import 'package:bluzelle/Utils/BluzelleWrapper.dart';
 import 'package:bluzelle/Utils/HexColor.dart';
@@ -38,6 +40,7 @@ class StatsState extends State<Stats>with AutomaticKeepAliveClientMixin{
     BondedNotBondedWrapper model = new BondedNotBondedWrapper.fromJson(json);
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String address = prefs.getString("address");
+    print(address);
     Response balModel = await BluzelleWrapper.getBalance(address);
     String body1 = utf8.decode(balModel.bodyBytes);
     final json1 = jsonDecode(body1);
@@ -162,6 +165,19 @@ class StatsState extends State<Stats>with AutomaticKeepAliveClientMixin{
                           child: Padding(
                             padding: const EdgeInsets.fromLTRB(0,0,8,0),
                             child: Text(address, overflow: TextOverflow.ellipsis , textAlign: TextAlign.start , style: TextStyle(fontWeight: FontWeight.bold, fontSize: 17, color: Colors.white)),
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(10,20,10,0),
+                          child: OutlineButton(
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(10))),
+                            child: SizedBox(width:MediaQuery.of(context).size.width*0.7,
+                                child: Center(child: Text("TRANSFER BNT",style: TextStyle(fontSize:20,color: Colors.white70, fontWeight: FontWeight.bold),))),
+                            onPressed: (){
+                              Navigator.pushNamed(context, SendTokens.routeName,);
+                            },
+
+                            borderSide: BorderSide(color: Colors.blue,style: BorderStyle.solid),
                           ),
                         ),
                       ],

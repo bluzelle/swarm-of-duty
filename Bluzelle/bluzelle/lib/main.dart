@@ -10,6 +10,9 @@ import 'package:bluzelle/Screens/ProposalDetails.dart';
 import 'package:bluzelle/Screens/RedelegationAmount.dart';
 import 'package:bluzelle/Screens/RedelegationTx.dart';
 import 'package:bluzelle/Screens/RedlegationConfirmation.dart';
+import 'package:bluzelle/Screens/SendToken.dart';
+import 'package:bluzelle/Screens/SendTokenConfirm.dart';
+import 'package:bluzelle/Screens/SendTokenTx.dart';
 import 'package:bluzelle/Screens/UndelegateConfirmation.dart';
 import 'package:bluzelle/Screens/VoteTx.dart';
 import 'package:bluzelle/Screens/WithdrawSuccess.dart';
@@ -94,7 +97,10 @@ class _MyAppState extends State<MyApp> {
         ProposalDepositTx.routeName : (context) => ProposalDepositTx(),
         ConfirmVote.routeName : (context) => ConfirmVote(),
         VoteTx.routeName : (context) => VoteTx(),
-        Login.routeName :(context) => Login()
+        Login.routeName :(context) => Login(),
+        SendTokenTx.routeName:(context) => SendTokenTx(),
+        SendTokenConfirm.routeName:(context) => SendTokenConfirm(),
+        SendTokens.routeName:(context) => SendTokens(),
       },
       title: 'Flutter Demo',
       theme: ThemeData(

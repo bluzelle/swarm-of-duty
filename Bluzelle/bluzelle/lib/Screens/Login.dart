@@ -34,6 +34,7 @@ class Login extends StatelessWidget{
                   controller: _mnemonic,
                   keyboardType: TextInputType.text,
                   autovalidate: true,
+                  maxLines: null,
                   validator: (val) => (val.isEmpty||val.split(" ").length==24)
                       ? null
                       : 'Invalid Mnemonic',

@@ -4,20 +4,19 @@ import 'package:shared_preferences/shared_preferences.dart';
 class BluzelleTransactions {
   static var  networkInfo = NetworkInfo(bech32Hrp: "bluzelle", lcdUrl: "http://testnet.private.bluzelle.com:1317", defaultTokenDenom: "ubnt");
 
-  static sendTokens()async {
-    var seed = "around buzz diagram captain obtain detail salon mango muffin brother morning jeans display attend knife carry green dwarf vendor hungry fan route pumpkin car";
+  static sendTokens(String addr, String amount)async {
+    int _stake = (1000000*double.parse(amount)).toInt();
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String seed= prefs.getString("mnemonic");
     final mnemonic = seed.split(" ");
     final wallet = Wallet.derive(mnemonic,  networkInfo);
-    var seed2 = "core fatigue rabbit trust soft country kitten energy punch little case mutual old mimic erupt interest voice inner category stand voice speed patient era";
-    final mnemonic2 = seed2.split(" ");
-    final wallet2 = Wallet.derive(mnemonic2,  networkInfo);
     final message = StdMsg(
       type: "cosmos-sdk/MsgSend",
       value: {
         "from_address": wallet.bech32Address,
-        "to_address": wallet2.bech32Address,
+        "to_address": addr,
         "amount": [
-          {"denom": "ubnt", "amount": "100000000"}
+          {"denom": "ubnt", "amount": _stake.toString()}
         ],
       },
     );
@@ -33,9 +32,13 @@ class BluzelleTransactions {
     );
     if (result.success) {
       print("Tx send successfully. Hash: ${result.hash}");
+      return result.hash;
     } else {
-      print("Tx send error: ${result.error.errorMessage}");
+      print("Tx send error: ${result.error.errorMessage}"
+      );
+      return result.error.errorMessage;
     }
+
   }
   static Future<String> sendDelegation(String amount, String validator)async {
     int _stake = (1000000*double.parse(amount)).toInt();
@@ -67,6 +70,7 @@ class BluzelleTransactions {
       return(result.hash);
     } else {
       print("Tx send error: ${result.error.errorMessage}");
+      return result.error.errorMessage;
     }
   }
   static Future<String>withdrawReward(String delegator, String validator)async {
@@ -94,6 +98,7 @@ class BluzelleTransactions {
       return(result.hash);
     } else {
       print("Tx send error: ${result.error.errorMessage}");
+      return result.error.errorMessage;
     }
   }
   static Future<String>undelegate(String delegator, String validator, String amount)async {
@@ -126,6 +131,7 @@ class BluzelleTransactions {
       return(result.hash);
     } else {
       print("Tx send error: ${result.error.errorMessage}");
+      return result.error.errorMessage;
     }
   }
   static Future<String>redelegate(String srcValidator, String destValidator, String delegator,String amount)async {
@@ -159,6 +165,7 @@ class BluzelleTransactions {
       return(result.hash);
     } else {
       print("Tx send error: ${result.error.errorMessage}");
+      return result.error.errorMessage;
     }
   }
   static Future<String>newProposal(String description, String title, String stake)async {
@@ -202,6 +209,7 @@ class BluzelleTransactions {
       return(result.hash);
     } else {
       print("Tx send error: ${result.error.errorMessage}");
+      return result.error.errorMessage;
     }
   }
   static Future<String>proposalDeposit(String id, String stake)async {
@@ -239,6 +247,7 @@ class BluzelleTransactions {
       return(result.hash);
     } else {
       print("Tx send error: ${result.error.errorMessage}");
+      return result.error.errorMessage;
     }
   }
   static Future<String>vote(String id, String vote)async {
@@ -270,6 +279,7 @@ class BluzelleTransactions {
       return(result.hash);
     } else {
       print("Tx send error: ${result.error.errorMessage}");
+      return result.error.errorMessage;
     }
   }
 }
