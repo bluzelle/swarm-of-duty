@@ -19,7 +19,7 @@ You can find apk of the app [here](https://github.com/Abhimanyu121/Bluzelle/rele
 
 #### NOTE 1:- This application is throughly tested to be running on android as well as iOS without any change in code, but if you face any issues please reach out to me on telegram `@abhimanyu121`
 #### NOTE 2:- I tried to impliment all the possible checks, but if you encounter any issues or bugs, please reach out to me.
-#### NOTE 3:- You can use this mnemonic if you need funds in the private testnet `metal iron divide before style recall holiday milk chimney chat ghost carry frozen fog cup foot hen opinion ketchup amazing salt hour wink will`
+#### NOTE 3:- You can use this mnemonic if you need funds in the private testnet `around buzz diagram captain obtain detail salon mango muffin brother morning jeans display attend knife carry green dwarf vendor hungry fan route pumpkin car`
 ### Video
 You can watch the small demo video [here](https://drive.google.com/file/d/1v3YkxVCM9DL5dL5tEpPPj2w4auE8qMRw/view?usp=sharing).
 ### Screenshots
