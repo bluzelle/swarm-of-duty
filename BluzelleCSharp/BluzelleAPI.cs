@@ -14,8 +14,28 @@ namespace BluzelleCSharp
 
         public BluzelleAPI(string namespaceId, string mnemonic, string address = null, string chainId = "bluzelle", string endpoint = "http://testnet.public.bluzelle.com:1317") : base(namespaceId, mnemonic, address, chainId, endpoint)
         {
+            new Task(Init).RunSynchronously();
+            
+            
+            var result = SendTransaction(new JObject {
+                ["Key"] = "a"
+            }, "post", "read", new GasInfo(0, 0, 0)).Result;
         }
 
+        private async void Init()
+        {
+            var account = await GetAccount(sessionAddress);
+            try
+            {
+                sessionAccount = account.AccountNumber.ToString();
+                sessionSequence = account.Sequence.ToString();
+            }
+            catch
+            {
+                throw new InitializationException();
+            }
+        }
+        
         public async Task TestRun()
         {
             //var res = GetAccount(sessionAddress).Result;
@@ -79,4 +99,6 @@ namespace BluzelleCSharp
             return (string) Query("node_info").Result["application_version"]?["version"];
         }
     }
+
+    internal class InitializationException : Exception { }
 }
