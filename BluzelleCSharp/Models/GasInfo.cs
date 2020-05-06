@@ -13,7 +13,7 @@ namespace BluzelleCSharp.Models
         [DefaultValue(null)]
         public int? MaxFee;
 
-        public GasInfo(int? gasPrice, int? maxGas, int? maxFee)
+        public GasInfo(int? gasPrice=null, int? maxGas=null, int? maxFee=null)
         {
             GasPrice = gasPrice;
             MaxGas = maxGas;

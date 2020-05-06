@@ -19,7 +19,9 @@ namespace BluzelleCSharp
             
             var result = SendTransaction(new JObject {
                 ["Key"] = "a"
-            }, "post", "read", new GasInfo(0, 0, 0)).Result;
+            }, "post", "read", new GasInfo{GasPrice = 10}).Result;
+            
+            return;
         }
 
         private async void Init()
@@ -27,8 +29,8 @@ namespace BluzelleCSharp
             var account = await GetAccount(sessionAddress);
             try
             {
-                sessionAccount = account.AccountNumber.ToString();
-                sessionSequence = account.Sequence.ToString();
+                sessionAccount = account.AccountNumber;
+                sessionSequence = account.Sequence;
             }
             catch
             {

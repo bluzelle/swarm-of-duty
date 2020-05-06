@@ -17,7 +17,7 @@ namespace BluzelleCSharp
         public SignaturePubKey(Key privateKey, string type = "tendermint/PubKeySecp256k1")
         {
             this.type = type;
-            value = Convert.ToBase64String(Encoding.UTF8.GetBytes(privateKey.PubKey.ToHex()));
+            value = Convert.ToBase64String(privateKey.PubKey.ToBytes());
         }
     }
     
