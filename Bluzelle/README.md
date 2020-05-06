@@ -1,6 +1,8 @@
 # Bluzelle Wallet
 This Flutter based application aims to facilitate the delegation and governance process of Bluzelle's testnet. </br>
 You can find apk of the app [here](https://github.com/Abhimanyu121/Bluzelle/releases).
+
+I am also submitting another network generic version of same app, it also encrypts mnemonic thus its more secure, and there is option of switching between bluzelle public and private testnet and even adding a new network, you can find it [here](https://github.com/Abhimanyu121/Megacosm-app). This app should build for iOS as well, but if you face issue bump iOS support version to 9.0 in your podfile as specified [here](https://pub.dev/packages/flutter_string_encryption#support).
 ## Feature List
 ### Banking
 1. Transfer BNT.
