@@ -1,13 +1,18 @@
 using System;
 using System.Globalization;
 using System.Linq;
+using NBitcoin;
+using NBitcoin.Crypto;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
-namespace BluzelleCSharp
+namespace BluzelleCSharp.Utils
 {
-    public class Utils
+    public static class Utils
     {
+        private const string Bip32Path = "m/44'/118'/0'/0/0";
+        private const string Bech32Prefix = "bluzelle";
+
         public static JObject ParseTransactionResult(string hex)
         {
             var json = "";
@@ -81,6 +86,17 @@ namespace BluzelleCSharp
 
             var offset2 = msg.IndexOf(':', offset1 + 1);
             return offset2 - offset1 - 2 <= 0 ? msg : msg.Substring(offset1 + 2, offset2 - offset1 - 2);
+        }
+        
+        public static Key MnemonicToPrivateKey(string mnemonic)
+        {
+            return new Mnemonic(mnemonic, Wordlist.English).DeriveExtKey().Derive(new KeyPath(Bip32Path)).PrivateKey;
+        }
+
+        public static string GetAddress(PubKey key)
+        {
+            var z = Hashes.SHA256(key.ToBytes());
+            return new Bech32(Bech32Prefix).Encode(Hashes.RIPEMD160(z, z.Length));
         }
     }
 }

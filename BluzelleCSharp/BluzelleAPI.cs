@@ -12,11 +12,8 @@ namespace BluzelleCSharp
     {
         public const int BlockTimeInSeconds = 5;
 
-        public BluzelleAPI(string namespaceId, string mnemonic, string address = null, string chainId = "bluzelle", string endpoint = "http://testnet.public.bluzelle.com:1317") : base(namespaceId, mnemonic, address, chainId, endpoint)
+        public BluzelleAPI(string namespaceId, string mnemonic, string address, string chainId = "bluzelle", string endpoint = "http://testnet.public.bluzelle.com:1317") : base(namespaceId, mnemonic, address, chainId, endpoint)
         {
-            new Task(Init).RunSynchronously();
-            
-            
             var result = SendTransaction(new JObject {
                 ["Key"] = "a"
             }, "post", "read", new GasInfo{GasPrice = 10}).Result;
@@ -26,16 +23,7 @@ namespace BluzelleCSharp
 
         private async void Init()
         {
-            var account = await GetAccount(sessionAddress);
-            try
-            {
-                sessionAccount = account.AccountNumber;
-                sessionSequence = account.Sequence;
-            }
-            catch
-            {
-                throw new InitializationException();
-            }
+            
         }
         
         public async Task TestRun()
@@ -91,11 +79,6 @@ namespace BluzelleCSharp
                     });
         }
 
-        public async Task<Account.AccountData> GetAccount(string address)
-        {
-            return Query<Account>($"auth/accounts/{address}").Result.Value;
-        }
-        
         public async Task<string> GetVersion()
         {
             return (string) Query("node_info").Result["application_version"]?["version"];
