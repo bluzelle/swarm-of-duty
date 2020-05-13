@@ -1,6 +1,7 @@
 using System;
 using System.Globalization;
 using System.Linq;
+using System.Text.Encodings.Web;
 using NBitcoin;
 using NBitcoin.Crypto;
 using Newtonsoft.Json;
@@ -15,6 +16,7 @@ namespace BluzelleCSharp.Utils
 
         public static JObject ParseTransactionResult(string hex)
         {
+            if (hex == null) return null;
             var json = "";
             for (var i = 0; i < hex.Length; i += 2)
                 json += (char) int.Parse(hex.Substring(i, 2), NumberStyles.HexNumber);
@@ -51,7 +53,12 @@ namespace BluzelleCSharp.Utils
                     return new JArray
                     {
                         data
-                            .OrderBy(i => i.Type == JTokenType.Array ? i.Count() : i)
+                            .OrderBy(i => i.Type switch
+                            {
+                                JTokenType.Array => i.Count(),
+                                JTokenType.Object => i.Count(),
+                                _ => i
+                            })
                             .Select(SortJObject)
                     };
                 default:
@@ -87,7 +94,7 @@ namespace BluzelleCSharp.Utils
             var offset2 = msg.IndexOf(':', offset1 + 1);
             return offset2 - offset1 - 2 <= 0 ? msg : msg.Substring(offset1 + 2, offset2 - offset1 - 2);
         }
-        
+
         public static Key MnemonicToPrivateKey(string mnemonic)
         {
             return new Mnemonic(mnemonic, Wordlist.English).DeriveExtKey().Derive(new KeyPath(Bip32Path)).PrivateKey;

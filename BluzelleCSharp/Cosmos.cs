@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Net;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Encodings.Web;
@@ -18,13 +20,14 @@ namespace BluzelleCSharp
     public class Cosmos
     {
         private const string SvfErrorMessage = "signature verification failed";
+        private const string KnfErrorMessage = "Key does not exist";
 
         protected const string CrudServicePrefix = "crud";
         private const string TxServicePrefix = "txs";
         public const string TokenName = "ubnt";
 
-        public const int RetryInterval = 1000;
-        public const int MaxRetries = 10;
+        private const int RetryInterval = 1000;
+        private const int MaxRetries = 10;
         private readonly string ChainId;
 
         protected readonly string NamespaceId;
@@ -34,6 +37,7 @@ namespace BluzelleCSharp
         private readonly string sessionAddress;
         private readonly Key sessionPk;
         private int sessionAccount;
+
         private int sessionSequence;
 
         public Cosmos(
@@ -87,7 +91,7 @@ namespace BluzelleCSharp
             }
             catch
             {
-                throw new InitializationException();
+                throw new Exceptions.InitializationException();
             }
         }
 
@@ -114,11 +118,13 @@ namespace BluzelleCSharp
             var methodValid = Enum.TryParse<Method>(type, true, out var httpMethod);
             if (!methodValid) throw new Exception($"HTTP method {type} is unsupported");
 
-            var request = new RestRequest($"{CrudServicePrefix}/{cmd}", httpMethod, DataFormat.Json)
+            var request = new RestRequest($"{CrudServicePrefix}/{cmd}", httpMethod)
                 .AddParameter("application/x-www-form-urlencoded", data, ParameterType.RequestBody);
 
-            var tx = restClient.PostAsync<JObject>(request).Result;
-
+            var resp = restClient.ExecuteAsync<JObject>(request).Result;
+            if (resp.StatusCode != HttpStatusCode.OK) throw new Exceptions.TransactionExecutionException(resp.Content);
+            var tx = resp.Data;
+            
             gasInfo?.UpdateTransaction(tx);
 
             tx["value"]!["memo"] = MakeRandomString(32);
@@ -138,6 +144,7 @@ namespace BluzelleCSharp
 
             if (res.ContainsKey("code"))
             {
+                if (res["raw_log"]!.ToString().Contains(KnfErrorMessage)) throw new KeyNotFoundException();
                 if (!res["raw_log"]!.ToString().Contains(SvfErrorMessage))
                     throw new Exceptions.TransactionExecutionException(
                         ExtractErrorFromMessage((string) res["raw_log"]));
@@ -183,6 +190,14 @@ namespace BluzelleCSharp
                 signature,
                 sessionAccount.ToString(),
                 sessionSequence.ToString());
+        }
+
+        public Task<JObject> SendTransaction(
+            string type,
+            string cmd,
+            GasInfo gasInfo = null)
+        {
+            return SendTransaction(new JObject(), type, cmd, gasInfo);
         }
     }
 }

@@ -11,6 +11,14 @@ namespace BluzelleCSharp.Utils
         public class InvalidChainIdException : Exception
         {
         }
+
+        public class InitializationException : Exception
+        {
+        }
+
+        public class InvalidLeaseException : Exception
+        {
+        }
         
         public class TransactionExecutionException : Exception
         {
