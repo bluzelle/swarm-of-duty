@@ -1,28 +1,26 @@
 using System;
+using System.Globalization;
 using System.Linq;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 namespace BluzelleCSharp
 {
     public class Utils
     {
-        public static string SanitizeString(string str)
+        public static JObject ParseTransactionResult(string hex)
         {
-            var result = "";
-            foreach (var ch in str)
-                switch (ch)
-                {
-                    case '&':
-                    case '<':
-                    case '>':
-                        result += "\\u00" + ((int) ch).ToString("X");
-                        break;
-                    default:
-                        result += ch;
-                        break;
-                }
+            var json = "";
+            for (var i = 0; i < hex.Length; i += 2)
+                json += (char) int.Parse(hex.Substring(i, 2), NumberStyles.HexNumber);
+            return JsonConvert.DeserializeObject<JObject>(json);
+        }
 
-            return result;
+        // Like sanitize_string in blzjs - escape utf8 '&', '>' and '<'
+        public static string EscapeCosmosString(string str)
+        {
+            return str.Aggregate("", (acc, x) =>
+                acc + (new[] {'&', '>', '<'}.Contains(x) ? $"\\u00{(int) x:X}" : $"{x}"));
         }
 
         public static string MakeRandomString(int length)

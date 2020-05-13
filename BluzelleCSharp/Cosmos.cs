@@ -94,7 +94,7 @@ namespace BluzelleCSharp
                 ["UUID"] = NamespaceId,
                 ["Owner"] = sessionAddress
             });
-            data.Merge(gasInfo);
+            // data.Merge(gasInfo);
 
             var methodValid = Enum.TryParse<Method>(type, true, out var httpMethod);
             if (!methodValid) throw new Exception($"HTTP method {type} is unsupported");
@@ -112,7 +112,7 @@ namespace BluzelleCSharp
 
             var requestBody = new JObject
             {
-                ["tx"] = tx,
+                ["tx"] = tx["value"],
                 ["mode"] = "block",
                 ["headers"] = new JObject {["Content-type"] = "application/x-www-form-urlencoded"}
             };
@@ -125,6 +125,7 @@ namespace BluzelleCSharp
             {
                 if (res["raw_log"]!.ToString().Contains(SvfErrorMessage))
                 {
+                    
                 }
                 else
                 {
@@ -134,7 +135,7 @@ namespace BluzelleCSharp
             else
             {
                 sessionSequence++;
-                return res["data"]! as JObject;
+                return Utils.ParseTransactionResult((string) res["data"]!);
             }
 
             return null;
@@ -152,9 +153,7 @@ namespace BluzelleCSharp
                 ["sequence"] = sessionSequence.ToString()
             });
 
-            // Like sanitize_string in blzjs - encode utf8 '&', '>' and '<'
-            str = str.Aggregate("", (acc, x) =>
-                acc + (new[] {'&', '>', '<'}.Contains(x) ? $"\\u00{(int) x:X}" : $"{x}"));
+            str = Utils.EscapeCosmosString(str);
 
             var hash = SHA256.Create().ComputeHash(Encoding.UTF8.GetBytes(str));
 
@@ -168,6 +167,8 @@ namespace BluzelleCSharp
                 signature,
                 sessionAccount.ToString(),
                 sessionSequence.ToString());
-        }
+        }    
+        
+        
     }
 }

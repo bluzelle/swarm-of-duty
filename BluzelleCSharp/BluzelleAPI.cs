@@ -21,7 +21,7 @@ namespace BluzelleCSharp
                 ["Key"] = "a"
             }, "post", "read", new GasInfo{GasPrice = 10}).Result;
             
-            return;
+            Console.WriteLine(1);
         }
 
         private async void Init()
