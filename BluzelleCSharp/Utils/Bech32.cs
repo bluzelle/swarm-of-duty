@@ -1,10 +1,8 @@
-using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using NBitcoin.DataEncoders;
 
-namespace BluzelleCSharp
+namespace BluzelleCSharp.Utils
 {
     public class Bech32: Bech32Encoder
     {

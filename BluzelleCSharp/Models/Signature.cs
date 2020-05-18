@@ -1,13 +1,9 @@
 // ReSharper disable InconsistentNaming
 
 using System;
-using System.Buffers.Text;
-using System.Collections.ObjectModel;
-using System.Text;
-using System.Text.Unicode;
 using NBitcoin;
 
-namespace BluzelleCSharp
+namespace BluzelleCSharp.Models
 {
     public class SignaturePubKey
     {
@@ -20,13 +16,13 @@ namespace BluzelleCSharp
             value = Convert.ToBase64String(privateKey.PubKey.ToBytes());
         }
     }
-    
+
     public class Signature
     {
-        public SignaturePubKey pub_key;
-        public string signature;
         public string account_number;
+        public SignaturePubKey pub_key;
         public string sequence;
+        public string signature;
 
         public Signature(
             Key pk,

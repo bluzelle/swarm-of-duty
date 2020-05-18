@@ -4,16 +4,15 @@ using System.Linq;
 using System.Text.Encodings.Web;
 using System.Threading.Tasks;
 using BluzelleCSharp.Models;
-using NBitcoin;
 using Newtonsoft.Json.Linq;
 
 namespace BluzelleCSharp
 {
-    public class BluzelleAPI : Cosmos
+    public class BluzelleApi : Cosmos
     {
         public const int BlockTimeInSeconds = 5;
 
-        public BluzelleAPI(string namespaceId, string mnemonic, string address, string chainId = "bluzelle",
+        public BluzelleApi(string namespaceId, string mnemonic, string address, string chainId = "bluzelle",
             string endpoint = "http://testnet.public.bluzelle.com:1317") : base(namespaceId, mnemonic, address, chainId,
             endpoint)
         {
@@ -91,7 +90,7 @@ namespace BluzelleCSharp
 
         public async Task<string> GetVersion()
         {
-            return (string) Query("node_info").Result["application_version"]?["version"];
+            return (string) (await Query("node_info"))["application_version"]?["version"];
         }
 
         #endregion
@@ -118,9 +117,9 @@ namespace BluzelleCSharp
             }, "post", "update", gasInfo);
         }
 
-        public async Task UpdateMany(JArray data, GasInfo gasInfo = null)
+        private async Task UpdateMany(JArray data, GasInfo gasInfo = null)
         {
-            var res = await SendTransaction(new JObject
+            await SendTransaction(new JObject
             {
                 ["KeyValues"] = data
             }, "post", "multiupdate", gasInfo);

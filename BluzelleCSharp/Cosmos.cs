@@ -17,6 +17,11 @@ using static BluzelleCSharp.Utils.Utils;
 
 namespace BluzelleCSharp
 {
+    /**
+     * <summary>
+     * Class implements main Cosmos network 
+     * </summary>
+     **/
     public class Cosmos
     {
         private const string SvfErrorMessage = "signature verification failed";
@@ -28,17 +33,16 @@ namespace BluzelleCSharp
 
         private const int RetryInterval = 1000;
         private const int MaxRetries = 10;
-        private readonly string ChainId;
 
         protected readonly string NamespaceId;
+        private readonly string _chainId;
 
-        private readonly RestClient restClient;
+        private readonly RestClient _restClient;
 
-        private readonly string sessionAddress;
-        private readonly Key sessionPk;
-        private int sessionAccount;
-
-        private int sessionSequence;
+        private readonly string _sessionAddress;
+        private readonly Key _sessionPk;
+        private int _sessionSequence;
+        private int _sessionAccount;
 
         public Cosmos(
             string namespaceId,
@@ -47,15 +51,15 @@ namespace BluzelleCSharp
             string chainId = "bluzelle",
             string endpoint = "http://testnet.public.bluzelle.com:1317")
         {
-            ChainId = chainId;
+            _chainId = chainId;
             NamespaceId = namespaceId;
-            sessionPk = MnemonicToPrivateKey(mnemonic);
-            sessionAddress = GetAddress(sessionPk.PubKey);
+            _sessionPk = MnemonicToPrivateKey(mnemonic);
+            _sessionAddress = GetAddress(_sessionPk.PubKey);
 
-            if (sessionAddress != address) throw new Exceptions.MnemonicInvalidException();
+            if (_sessionAddress != address) throw new Exceptions.MnemonicInvalidException();
 
-            restClient = new RestClient(endpoint);
-            restClient.UseNewtonsoftJson(new JsonSerializerSettings
+            _restClient = new RestClient(endpoint);
+            _restClient.UseNewtonsoftJson(new JsonSerializerSettings
             {
                 ContractResolver = new DefaultContractResolver
                 {
@@ -67,26 +71,27 @@ namespace BluzelleCSharp
             UpdateAccount();
         }
 
+        
         public async Task<T> Query<T>(string query)
         {
-            return (await restClient.GetAsync<Responce<T>>(
+            return (await _restClient.GetAsync<Responce<T>>(
                 new RestRequest(UrlEncoder.Default.Encode(query), DataFormat.Json))).Result;
         }
 
         public async Task<JObject> Query(string query)
         {
-            return await restClient.GetAsync<JObject>(
+            return await _restClient.GetAsync<JObject>(
                 new RestRequest(UrlEncoder.Default.Encode(query), DataFormat.Json));
         }
 
         private bool UpdateAccount()
         {
-            var accountData = GetAccount(sessionAddress, true).Result;
+            var accountData = GetAccount(_sessionAddress, true).Result;
             try
             {
-                sessionAccount = accountData.AccountNumber;
-                if (sessionSequence == accountData.Sequence) return false;
-                sessionSequence = accountData.Sequence;
+                _sessionAccount = accountData.AccountNumber;
+                if (_sessionSequence == accountData.Sequence) return false;
+                _sessionSequence = accountData.Sequence;
                 return true;
             }
             catch
@@ -109,9 +114,9 @@ namespace BluzelleCSharp
         {
             data.Merge(new JObject
             {
-                ["BaseReq"] = new JObject {["from"] = sessionAddress, ["chain_id"] = ChainId},
+                ["BaseReq"] = new JObject {["from"] = _sessionAddress, ["chain_id"] = _chainId},
                 ["UUID"] = NamespaceId,
-                ["Owner"] = sessionAddress
+                ["Owner"] = _sessionAddress
             });
             if (gasInfo != null) data.Merge(gasInfo.Obj);
 
@@ -121,7 +126,7 @@ namespace BluzelleCSharp
             var request = new RestRequest($"{CrudServicePrefix}/{cmd}", httpMethod)
                 .AddParameter("application/x-www-form-urlencoded", data, ParameterType.RequestBody);
 
-            var resp = restClient.ExecuteAsync<JObject>(request).Result;
+            var resp = _restClient.ExecuteAsync<JObject>(request).Result;
             if (resp.StatusCode != HttpStatusCode.OK) throw new Exceptions.TransactionExecutionException(resp.Content);
             var tx = resp.Data;
             
@@ -140,7 +145,7 @@ namespace BluzelleCSharp
             request = new RestRequest($"{TxServicePrefix}", httpMethod, DataFormat.Json)
                 .AddParameter("application/x-www-form-urlencoded", requestBody, ParameterType.RequestBody);
 
-            var res = await restClient.PostAsync<JObject>(request);
+            var res = await _restClient.PostAsync<JObject>(request);
 
             if (res.ContainsKey("code"))
             {
@@ -159,7 +164,7 @@ namespace BluzelleCSharp
                 throw new Exceptions.InvalidChainIdException();
             }
 
-            sessionSequence++;
+            _sessionSequence++;
             return ParseTransactionResult((string) res["data"]!);
         }
 
@@ -168,12 +173,12 @@ namespace BluzelleCSharp
         {
             var str = JsonConvert.SerializeObject(new JObject
             {
-                ["account_number"] = sessionAccount.ToString(),
-                ["chain_id"] = ChainId,
+                ["account_number"] = _sessionAccount.ToString(),
+                ["chain_id"] = _chainId,
                 ["fee"] = SortJObject(data["value"]!["fee"]),
                 ["memo"] = data["value"]!["memo"],
                 ["msgs"] = SortJObject(data["value"]["msg"]),
-                ["sequence"] = sessionSequence.ToString()
+                ["sequence"] = _sessionSequence.ToString()
             });
 
             str = EscapeCosmosString(str);
@@ -182,14 +187,14 @@ namespace BluzelleCSharp
 
             // Create signature and remove first byte when encoding base64, because SignCompact returns header+R+S
             var signature = Convert.ToBase64String(
-                sessionPk.SignCompact(new uint256(hash), false),
+                _sessionPk.SignCompact(new uint256(hash), false),
                 1, 64);
 
             return new Signature(
-                sessionPk,
+                _sessionPk,
                 signature,
-                sessionAccount.ToString(),
-                sessionSequence.ToString());
+                _sessionAccount.ToString(),
+                _sessionSequence.ToString());
         }
 
         public Task<JObject> SendTransaction(
