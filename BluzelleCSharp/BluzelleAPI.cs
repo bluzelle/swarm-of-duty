@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text.Encodings.Web;
 using System.Threading.Tasks;
 using BluzelleCSharp.Models;
+using NBitcoin;
 using Newtonsoft.Json.Linq;
 
 namespace BluzelleCSharp
@@ -16,19 +17,6 @@ namespace BluzelleCSharp
             string endpoint = "http://testnet.public.bluzelle.com:1317") : base(namespaceId, mnemonic, address, chainId,
             endpoint)
         {
-            
-            var r4esult = TxGetNShortestLease(1, new GasInfo {GasPrice = 10}).Result;
-            Console.WriteLine(1);
-        }
-
-        private async void Init()
-        {
-        }
-
-        public async Task TestRun()
-        {
-            //var res = GetAccount(sessionAddress).Result;
-            //Console.WriteLine(res.Address);
         }
 
         #region REST API Queries
@@ -81,21 +69,24 @@ namespace BluzelleCSharp
                    * BlockTimeInSeconds;
         }
 
-        private Dictionary<string, int> PostprocessGNSL(JToken data)
+        private List<KeyValuePair<string, int>> PostprocessNShortestLeases(JToken data)
         {
              return data.Aggregate(
-                 new Dictionary<string, int>(),
+                 new List<KeyValuePair<string, int>>(),
                  (cur, next) =>
                  {
-                     cur.Add(((string) next["key"])!, (int) next["lease"] * BlockTimeInSeconds);
+                     cur.Add(new KeyValuePair<string, int>(
+                         (string) next["key"], 
+                         (int) next["lease"] * BlockTimeInSeconds)
+                     );
                      return cur;
                  });
         }
         
-        public async Task<Dictionary<string, int>> GetNShortestLease(int n)
+        public async Task<List<KeyValuePair<string, int>>> GetNShortestLease(int n)
         {
-            var res = await Query<JObject>($"{CrudServicePrefix}/getnshortestlease/{NamespaceId}/{n}");
-            return PostprocessGNSL(res["keyleases"] ?? throw new Exception("Failed to get leases list"));
+            var res = await Query<JObject>($"{CrudServicePrefix}/getnshortestleases/{NamespaceId}/{n}");
+            return PostprocessNShortestLeases(res["keyleases"] ?? throw new Exception("Failed to get leases list"));
         }
 
         public async Task<string> GetVersion()
@@ -231,14 +222,14 @@ namespace BluzelleCSharp
             }, "post", "getlease", gasInfo))["lease"] * BlockTimeInSeconds;
         }
 
-        public async Task<Dictionary<string, int>> TxGetNShortestLease(int n, GasInfo gasInfo = null)
+        public async Task<List<KeyValuePair<string, int>>> TxGetNShortestLease(int n, GasInfo gasInfo = null)
         {
             if(n < 0) throw new Exception("Invalid N");
             var res = await SendTransaction(new JObject
             {
-                ["N"] = n
-            }, "post", "getnshortestlease", gasInfo);
-            return PostprocessGNSL(res["keyleases"] ?? throw new Exception("Failed to get leases list"));
+                ["N"] = $"{n}"
+            }, "post", "getnshortestleases", gasInfo);
+            return PostprocessNShortestLeases(res["keyleases"] ?? throw new Exception("Failed to get leases list"));
         }
         
         #endregion
