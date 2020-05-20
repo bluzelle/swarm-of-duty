@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.Encodings.Web;
+using System.Threading;
 using System.Threading.Tasks;
 using BluzelleCSharp.Models;
 using Newtonsoft.Json.Linq;
@@ -70,18 +71,18 @@ namespace BluzelleCSharp
 
         private List<KeyValuePair<string, int>> PostprocessNShortestLeases(JToken data)
         {
-             return data.Aggregate(
-                 new List<KeyValuePair<string, int>>(),
-                 (cur, next) =>
-                 {
-                     cur.Add(new KeyValuePair<string, int>(
-                         (string) next["key"], 
-                         (int) next["lease"] * BlockTimeInSeconds)
-                     );
-                     return cur;
-                 });
+            return data.Aggregate(
+                new List<KeyValuePair<string, int>>(),
+                (cur, next) =>
+                {
+                    cur.Add(new KeyValuePair<string, int>(
+                        (string) next["key"],
+                        (int) next["lease"] * BlockTimeInSeconds)
+                    );
+                    return cur;
+                });
         }
-        
+
         public async Task<List<KeyValuePair<string, int>>> GetNShortestLease(int n)
         {
             var res = await Query<JObject>($"{CrudServicePrefix}/getnshortestleases/{NamespaceId}/{n}");
@@ -161,7 +162,7 @@ namespace BluzelleCSharp
                 ["NewKey"] = newKey
             }, "post", "rename", gasInfo);
         }
-        
+
         public async Task Renew(string key, LeaseInfo leaseInfo, GasInfo gasInfo = null)
         {
             await SendTransaction(new JObject
@@ -170,7 +171,7 @@ namespace BluzelleCSharp
                 ["Lease"] = leaseInfo.Value
             }, "post", "renewlease", gasInfo);
         }
-        
+
         public async Task RenewAll(LeaseInfo leaseInfo, GasInfo gasInfo = null)
         {
             await SendTransaction(new JObject
@@ -223,14 +224,14 @@ namespace BluzelleCSharp
 
         public async Task<List<KeyValuePair<string, int>>> TxGetNShortestLease(int n, GasInfo gasInfo = null)
         {
-            if(n < 0) throw new Exception("Invalid N");
+            if (n < 0) throw new Exception("Invalid N");
             var res = await SendTransaction(new JObject
             {
                 ["N"] = $"{n}"
             }, "post", "getnshortestleases", gasInfo);
             return PostprocessNShortestLeases(res["keyleases"] ?? throw new Exception("Failed to get leases list"));
         }
-        
+
         #endregion
     }
 }

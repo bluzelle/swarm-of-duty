@@ -13,6 +13,7 @@ using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Serialization;
 using RestSharp;
 using RestSharp.Serializers.NewtonsoftJson;
+using Threading;
 using static BluzelleCSharp.Utils.Utils;
 
 namespace BluzelleCSharp
@@ -33,16 +34,18 @@ namespace BluzelleCSharp
 
         private const int RetryInterval = 1000;
         private const int MaxRetries = 10;
-
-        protected readonly string NamespaceId;
         private readonly string _chainId;
 
         private readonly RestClient _restClient;
 
         private readonly string _sessionAddress;
         private readonly Key _sessionPk;
-        private int _sessionSequence;
+
+        private readonly SerialQueue _transactionQueue;
+
+        protected readonly string NamespaceId;
         private int _sessionAccount;
+        private int _sessionSequence;
 
         public Cosmos(
             string namespaceId,
@@ -68,10 +71,11 @@ namespace BluzelleCSharp
                 NullValueHandling = NullValueHandling.Ignore
             });
 
+            _transactionQueue = new SerialQueue();
+            
             UpdateAccount();
         }
 
-        
         public async Task<T> Query<T>(string query)
         {
             return (await _restClient.GetAsync<Responce<T>>(
@@ -105,7 +109,24 @@ namespace BluzelleCSharp
             return (await Query<Account>($"auth/accounts/{address}")).Value;
         }
 
-        public async Task<JObject> SendTransaction(
+        public Task<JObject> SendTransaction(
+            JObject data,
+            string type,
+            string cmd,
+            GasInfo gasInfo = null)
+        {
+            return _transactionQueue.Enqueue(() => ExecuteTransaction(data, type, cmd, gasInfo));
+        }
+
+        public Task<JObject> SendTransaction(
+            string type,
+            string cmd,
+            GasInfo gasInfo = null)
+        {
+            return SendTransaction(new JObject(), type, cmd, gasInfo);
+        }
+
+        private async Task<JObject> ExecuteTransaction(
             JObject data,
             string type,
             string cmd,
@@ -158,7 +179,7 @@ namespace BluzelleCSharp
                 {
                     retries--;
                     await Task.Delay(RetryInterval);
-                    if (UpdateAccount()) return await SendTransaction(data, type, cmd, gasInfo, retries);
+                    if (UpdateAccount()) return await ExecuteTransaction(data, type, cmd, gasInfo, retries);
                 }
 
                 throw new Exceptions.InvalidChainIdException();
@@ -167,7 +188,6 @@ namespace BluzelleCSharp
             _sessionSequence++;
             return ParseTransactionResult((string) res["data"]!);
         }
-
 
         private Signature SignTransaction(JObject data)
         {
@@ -195,14 +215,6 @@ namespace BluzelleCSharp
                 signature,
                 _sessionAccount.ToString(),
                 _sessionSequence.ToString());
-        }
-
-        public Task<JObject> SendTransaction(
-            string type,
-            string cmd,
-            GasInfo gasInfo = null)
-        {
-            return SendTransaction(new JObject(), type, cmd, gasInfo);
         }
     }
 }
