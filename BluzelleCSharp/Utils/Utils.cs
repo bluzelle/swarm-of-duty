@@ -14,6 +14,11 @@ namespace BluzelleCSharp.Utils
         private const string Bip32Path = "m/44'/118'/0'/0/0";
         private const string Bech32Prefix = "bluzelle";
 
+        /**
+         * <summary>Decoding Cosmos transaction "data" field from hex</summary>
+         * <param name="hex">Cosmos transaction data hex-encoded</param>
+         * <returns>Decoded JSON object as <see cref="JObject"/></returns>
+         */
         public static JObject ParseTransactionResult(string hex)
         {
             if (hex == null) return null;
@@ -23,13 +28,19 @@ namespace BluzelleCSharp.Utils
             return JsonConvert.DeserializeObject<JObject>(json);
         }
 
-        // Like sanitize_string in blzjs - escape utf8 '&', '>' and '<'
+        /**
+         * <summary>Like sanitize_string in blzjs - escape utf8's '&', '>' and '<'</summary>
+         */
         public static string EscapeCosmosString(string str)
         {
             return str.Aggregate("", (acc, x) =>
                 acc + (new[] {'&', '>', '<'}.Contains(x) ? $"\\u00{(int) x:X}" : $"{x}"));
         }
 
+        /**
+         * <summary>Generates random string from A-Za-z0-9</summary>
+         * <param name="length">Result string length</param>
+         */
         public static string MakeRandomString(int length)
         {
             var result = "";
@@ -39,6 +50,9 @@ namespace BluzelleCSharp.Utils
             return result;
         }
 
+        /**
+         * <summary>Sorts JSON object recursively. Criteria: by property names / by elements number / IComparable</summary>
+         */
         public static JToken SortJObject(JToken data)
         {
             switch (data.Type)
@@ -66,10 +80,12 @@ namespace BluzelleCSharp.Utils
             }
         }
 
+        /**
+         * <summary>Function for extraction human-readable error string from Cosmos network error</summary>
+         * <remarks>Credits to BlzJS library. This code is just a transcription from JS</remarks>
+         */
         public static string ExtractErrorFromMessage(string msg)
         {
-            // Credit to BlzJS library. The following code is just a transcription from JS to C#
-
             // This is very fragile and will break if Cosmos changes their error format again
             // currently it looks like "unauthorized: Key already exists: failed to execute message; message index: 0"
             // and we just want the "Key already exists" bit. However with some messages, e.g.
@@ -95,11 +111,21 @@ namespace BluzelleCSharp.Utils
             return offset2 - offset1 - 2 <= 0 ? msg : msg.Substring(offset1 + 2, offset2 - offset1 - 2);
         }
 
+        /**
+         * <summary>Use BIP39 to decode private key from mnemonic</summary>
+         * <param name="mnemonic">BIP39 mnemonic string</param>
+         * <returns>Private key in <see cref="NBitcoin.Key"/> format</returns>
+         */
         public static Key MnemonicToPrivateKey(string mnemonic)
         {
             return new Mnemonic(mnemonic, Wordlist.English).DeriveExtKey().Derive(new KeyPath(Bip32Path)).PrivateKey;
         }
 
+        /**
+         * <summary>Return Cosmos network address from public key</summary>
+         * <param name="key">Public key in <see cref="NBitcoin.PubKey"/> format</param>
+         * <returns>Formatted address string</returns>
+         */
         public static string GetAddress(PubKey key)
         {
             var z = Hashes.SHA256(key.ToBytes());

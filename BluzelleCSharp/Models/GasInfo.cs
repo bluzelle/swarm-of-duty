@@ -18,6 +18,9 @@ namespace BluzelleCSharp.Models
             MaxFee = maxFee;
         }
 
+        /**
+         * <summary>Generate <see cref="JObject"/> based on current gas configuration for transaction data</summary>
+         */
         public JObject Obj =>
             new JObject
             {
@@ -26,6 +29,11 @@ namespace BluzelleCSharp.Models
                 ["gas_price"] = GasPrice != null ? GasPrice.ToString() : null
             };
 
+        
+        /**
+         * <summary>Updates transaction data by inserting existing gas configuration into <paramref name="res"/></summary>
+         * <param name="res">Transaction base retrieved from Bluzelle api</param>
+         */
         public void UpdateTransaction(JObject res)
         {
             var gas = res["value"]!["fee"]!["gas"]!.ToObject<int>();

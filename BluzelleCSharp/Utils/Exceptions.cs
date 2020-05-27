@@ -2,7 +2,7 @@ using System;
 
 namespace BluzelleCSharp.Utils
 {
-    public class Exceptions
+    public static class Exceptions
     {
         public class MnemonicInvalidException : Exception
         {
