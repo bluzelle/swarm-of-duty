@@ -2,17 +2,17 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.Encodings.Web;
-using System.Threading;
 using System.Threading.Tasks;
 using BluzelleCSharp.Models;
+using BluzelleCSharp.Utils;
 using Newtonsoft.Json.Linq;
 
 namespace BluzelleCSharp
 {
     /**
      * <summary>
-     * API for bluzelle database.
-     * Most of operations are available in transaction (methods have 'tx' prefix) and query styles
+     *     API for bluzelle database.
+     *     Most of operations are available in transaction (methods have 'tx' prefix) and query styles
      * </summary>
      */
     public class BluzelleApi : Cosmos
@@ -36,7 +36,7 @@ namespace BluzelleCSharp
         #region REST API Queries
 
         /**
-         * <summary>Read value of key <paramref name="id"/></summary>
+         * <summary>Read value of key <paramref name="id" /></summary>
          * <param name="id">DB key string</param>
          * <param name="prove">Use "pread" of "read" operation</param>
          * <returns>String value</returns>
@@ -50,7 +50,7 @@ namespace BluzelleCSharp
         }
 
         /**
-         * <summary>Check existence of key <paramref name="id"/></summary>
+         * <summary>Check existence of key <paramref name="id" /></summary>
          * <param name="id">DB key string</param>
          * <returns>true if key exists in current namespace</returns>
          */
@@ -77,7 +77,7 @@ namespace BluzelleCSharp
         {
             return (int) (await Query<JObject>($"{CrudServicePrefix}/count/{NamespaceId}"))["count"];
         }
-        
+
         /**
          * <summary>Get all data in Key-Value style from this namespace</summary>
          * <returns>Dictionary contains keys and values</returns>
@@ -89,7 +89,7 @@ namespace BluzelleCSharp
         }
 
         /**
-         * <summary>Get lease time of key <paramref name="key"/></summary>
+         * <summary>Get lease time of key <paramref name="key" /></summary>
          * <param name="key">DB key string</param>
          * <returns>Lease time in seconds</returns>
          */
@@ -101,7 +101,7 @@ namespace BluzelleCSharp
 
         /**
          * <summary>Get N shortest leases in current namespace</summary>
-         * <param name="n">Leases to return</param>
+         * <param name="n">Leases number to return</param>
          * <returns>List containing shortest leases in ascending order with KeyValuePair of keys and its' leases in seconds</returns>
          */
         public async Task<List<KeyValuePair<string, int>>> GetNShortestLease(int n)
@@ -110,6 +110,9 @@ namespace BluzelleCSharp
             return PostprocessNShortestLeases(res["keyleases"] ?? throw new Exception("Failed to get leases list"));
         }
 
+        /**
+         * <summary>Get version of current node</summary>
+         */
         public async Task<string> GetVersion()
         {
             return (string) (await Query("node_info"))["application_version"]?["version"];
@@ -119,6 +122,14 @@ namespace BluzelleCSharp
 
         #region Transaction Queries
 
+        /**
+         * <summary>Create Key <paramref name="key" /> with value <paramref name="value" /> in current namespace</summary>
+         * <param name="key">String key to create</param>
+         * <param name="value">String value of key</param>
+         * <param name="leaseInfo">Lease time for new key</param>
+         * <param name="gasInfo">Gas specified for transaction execution</param>
+         * <exception cref="Exceptions.KeyAlreadyFoundException"></exception>
+         */
         public async Task Create(string key, string value, LeaseInfo leaseInfo, GasInfo gasInfo = null)
         {
             await SendTransaction(new JObject
@@ -129,6 +140,13 @@ namespace BluzelleCSharp
             }, "post", "create", gasInfo);
         }
 
+        /**
+         * <summary>Update Key's value to <paramref name="value" /> in current namespace</summary>
+         * <param name="key">String key to update</param>
+         * <param name="value">String value of key</param>
+         * <param name="leaseInfo">Lease time which to set after updating</param>
+         * <param name="gasInfo">Gas specified for transaction execution</param>
+         */
         public async Task Update(string key, string value, LeaseInfo leaseInfo, GasInfo gasInfo = null)
         {
             await SendTransaction(new JObject
@@ -139,6 +157,11 @@ namespace BluzelleCSharp
             }, "post", "update", gasInfo);
         }
 
+        /**
+         * <summary>Update number of keys simultaneously in current namespace</summary>
+         * <param name="data">JArray in Bluzelle update format</param>
+         * <param name="gasInfo">Gas specified for transaction execution</param>
+         */
         private async Task UpdateMany(JArray data, GasInfo gasInfo = null)
         {
             await SendTransaction(new JObject
@@ -147,6 +170,12 @@ namespace BluzelleCSharp
             }, "post", "multiupdate", gasInfo);
         }
 
+
+        /**
+         * <summary>Update number of keys simultaneously in current namespace</summary>
+         * <param name="data">Dictionary with key-value pairs to update</param>
+         * <param name="gasInfo">Gas specified for transaction execution</param>
+         */
         public async Task UpdateMany(Dictionary<string, string> data, GasInfo gasInfo = null)
         {
             await UpdateMany(data.Aggregate(
@@ -162,6 +191,12 @@ namespace BluzelleCSharp
                 }), gasInfo);
         }
 
+
+        /**
+         * <summary>Delete key <paramref name="key" /> from current namespace</summary>
+         * <param name="key">Key to delete</param>
+         * <param name="gasInfo">Gas specified for transaction execution</param>
+         */
         public async Task Delete(string key, GasInfo gasInfo = null)
         {
             await SendTransaction(new JObject
@@ -170,11 +205,23 @@ namespace BluzelleCSharp
             }, "delete", "delete", gasInfo);
         }
 
+
+        /**
+         * <summary>Delete all keys in current namespace</summary>
+         * <param name="gasInfo">Gas specified for transaction execution</param>
+         */
         public async Task DeleteAll(GasInfo gasInfo = null)
         {
             await SendTransaction("post", "deleteall", gasInfo);
         }
 
+        
+        /**
+         * <summary>Rename <paramref name="key"/> into <paramref name="newKey"/> in current namespace</summary>
+         * <param name="key">Key name which to rename</param>
+         * <param name="newKey">New name for <paramref name="key"/></param>
+         * <param name="gasInfo">Gas specified for transaction execution</param>
+         */
         public async Task Rename(string key, string newKey, GasInfo gasInfo = null)
         {
             await SendTransaction(new JObject
@@ -184,6 +231,13 @@ namespace BluzelleCSharp
             }, "post", "rename", gasInfo);
         }
 
+        
+        /**
+         * <summary>Renew lease time of a key in current namespace</summary>
+         * <param name="key">Key to update</param>
+         * <param name="leaseInfo">Lease time to set</param>
+         * <param name="gasInfo">Gas specified for transaction execution</param>
+         */
         public async Task Renew(string key, LeaseInfo leaseInfo, GasInfo gasInfo = null)
         {
             await SendTransaction(new JObject
@@ -193,6 +247,11 @@ namespace BluzelleCSharp
             }, "post", "renewlease", gasInfo);
         }
 
+        /**
+         * <summary>Renew lease time for all keys current namespace</summary>
+         * <param name="leaseInfo">Lease time to set</param>
+         * <param name="gasInfo">Gas specified for transaction execution</param>
+         */
         public async Task RenewAll(LeaseInfo leaseInfo, GasInfo gasInfo = null)
         {
             await SendTransaction(new JObject
@@ -201,22 +260,39 @@ namespace BluzelleCSharp
             }, "post", "renewleaseall", gasInfo);
         }
 
-        public async Task<string> TxRead(string key, GasInfo gasInfo = null)
+        /**
+         * <summary>Read value of key <paramref name="id"/></summary>
+         * <param name="id">DB key string</param>
+         * <param name="gasInfo">Gas specified for transaction execution</param>
+         * <returns>String value</returns>
+         */
+        public async Task<string> TxRead(string id, GasInfo gasInfo = null)
         {
             return (string) (await SendTransaction(new JObject
             {
-                ["Key"] = key
+                ["Key"] = id
             }, "post", "read", gasInfo))["value"];
         }
 
-        public async Task<bool> TxHas(string key, GasInfo gasInfo = null)
+        /**
+         * <summary>Check existence of key <paramref name="id" /></summary>
+         * <param name="id">DB key string</param>
+         * <param name="gasInfo">Gas specified for transaction execution</param>
+         * <returns>true if key exists in current namespace</returns>
+         */
+        public async Task<bool> TxHas(string id, GasInfo gasInfo = null)
         {
             return (bool) (await SendTransaction(new JObject
             {
-                ["Key"] = key
+                ["Key"] = id
             }, "post", "has", gasInfo))["has"];
         }
 
+        /**
+         * <summary>Retrieve list of keys in current namespace</summary>
+         * <param name="gasInfo">Gas specified for transaction execution</param>
+         * <returns>List of strings with keys available</returns>
+         */
         public async Task<List<string>> TxKeys(GasInfo gasInfo = null)
         {
             return (await SendTransaction("post", "keys", gasInfo))
@@ -224,17 +300,32 @@ namespace BluzelleCSharp
                 ?.ToObject<List<string>>();
         }
 
+        /**
+         * <summary>Get keys count in current namespace</summary>
+         * <param name="gasInfo">Gas specified for transaction execution</param>
+         */
         public async Task<int> TxCount(GasInfo gasInfo = null)
         {
             return (int) (await SendTransaction("post", "count", gasInfo))["count"];
         }
 
+        /**
+         * <summary>Get all data in Key-Value style from this namespace</summary>
+         * <param name="gasInfo">Gas specified for transaction execution</param>
+         * <returns>Dictionary contains keys and values</returns>
+         */
         public async Task<Dictionary<string, string>> TxGetKeyValues(GasInfo gasInfo = null)
         {
             var data = await SendTransaction("post", "keyvalues", gasInfo);
             return PostprocessKeyVal(data["keyvalues"]);
         }
 
+        /**
+         * <summary>Get lease time of key <paramref name="key" /></summary>
+         * <param name="key">DB key string</param>
+         * <param name="gasInfo">Gas specified for transaction execution</param>
+         * <returns>Lease time in seconds</returns>
+         */
         public async Task<int> TxGetLease(string key, GasInfo gasInfo = null)
         {
             return (int) (await SendTransaction(new JObject
@@ -243,6 +334,12 @@ namespace BluzelleCSharp
             }, "post", "getlease", gasInfo))["lease"] * BlockTimeInSeconds;
         }
 
+        /**
+         * <summary>Get N shortest leases in current namespace</summary>
+         * <param name="n">Leases number to return</param>
+         * <param name="gasInfo">Gas specified for transaction execution</param>
+         * <returns>List containing shortest leases in ascending order with KeyValuePair of keys and its' leases in seconds</returns>
+         */
         public async Task<List<KeyValuePair<string, int>>> TxGetNShortestLease(int n, GasInfo gasInfo = null)
         {
             if (n < 0) throw new Exception("Invalid N");
@@ -256,6 +353,7 @@ namespace BluzelleCSharp
         #endregion
 
         #region Utilitary functions
+
         /**
          * <summary>Function for converting JSON response of KeyValue command into C# native dictionary</summary>
          * <param name="data">JSON array of objects with "key" and "value" fields</param>
@@ -271,7 +369,7 @@ namespace BluzelleCSharp
                     return cur;
                 });
         }
-        
+
         /**
          * <summary>Function for converting JSON response of N-shortest-leases command into C# native list with KeyValues</summary>
          * <param name="data">JSON array of objects with "key" and "lease" fields</param>

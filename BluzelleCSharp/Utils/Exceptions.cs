@@ -19,7 +19,11 @@ namespace BluzelleCSharp.Utils
         public class InvalidLeaseException : Exception
         {
         }
-        
+
+        public class KeyAlreadyFoundException : Exception
+        {
+        }
+
         public class TransactionExecutionException : Exception
         {
             public TransactionExecutionException(string err) : base(err)
