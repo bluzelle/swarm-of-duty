@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using BluzelleCSharp;
 using BluzelleCSharp.Models;
+using Microsoft.Extensions.Configuration;
 
 namespace ExampleApp
 {
@@ -54,12 +54,14 @@ namespace ExampleApp
         {
             try
             {
-                var bz = new BluzelleApi(
-                    "7f346254-2024-496f-bfa3-572a2e87ebd2",
-                    "around buzz diagram captain obtain detail salon mango muffin brother morning jeans display attend knife carry green dwarf vendor hungry fan route pumpkin car",
-                    "bluzelle1upsfjftremwgxz3gfy0wf3xgvwpymqx754ssu9");
+                var config = new ConfigurationBuilder()
+                    .AddJsonFile("appsettings.json")
+                    .Build()
+                    .GetSection("Bluzelle");
+
+                var bz = new BluzelleApi(config["Namespace"], config["Mnemonic"], config["Address"]);
                 var gas = new GasInfo {GasPrice = 10};
-                
+
                 if (args.Length == 0) PrintHelp();
                 switch (args[0])
                 {
@@ -146,7 +148,7 @@ namespace ExampleApp
                         return;
                 }
             }
-            catch(Exception exception)
+            catch (Exception exception)
             {
                 Console.WriteLine(exception.Message);
                 PrintHelp();
