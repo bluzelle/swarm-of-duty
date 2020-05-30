@@ -123,20 +123,20 @@ namespace BluzelleCSharp
         #region Transaction Queries
 
         /**
-         * <summary>Create Key <paramref name="key" /> with value <paramref name="value" /> in current namespace</summary>
+         * <summary>Create <paramref name="key" /> with <paramref name="value" /> in current namespace</summary>
          * <param name="key">String key to create</param>
          * <param name="value">String value of key</param>
          * <param name="leaseInfo">Lease time for new key</param>
          * <param name="gasInfo">Gas specified for transaction execution</param>
          * <exception cref="Exceptions.KeyAlreadyFoundException"></exception>
          */
-        public async Task Create(string key, string value, LeaseInfo leaseInfo, GasInfo gasInfo = null)
+        public async Task Create(string key, string value, LeaseInfo leaseInfo = null, GasInfo gasInfo = null)
         {
             await SendTransaction(new JObject
             {
                 ["Key"] = key,
                 ["Value"] = value,
-                ["Lease"] = leaseInfo.Value
+                ["Lease"] = leaseInfo == null ? "0" : leaseInfo.Value
             }, "post", "create", gasInfo);
         }
 
@@ -147,13 +147,13 @@ namespace BluzelleCSharp
          * <param name="leaseInfo">Lease time which to set after updating</param>
          * <param name="gasInfo">Gas specified for transaction execution</param>
          */
-        public async Task Update(string key, string value, LeaseInfo leaseInfo, GasInfo gasInfo = null)
+        public async Task Update(string key, string value, LeaseInfo leaseInfo = null, GasInfo gasInfo = null)
         {
             await SendTransaction(new JObject
             {
                 ["Key"] = key,
                 ["Value"] = value,
-                ["Lease"] = leaseInfo.Value
+                ["Lease"] = leaseInfo == null ? "0" : leaseInfo.Value
             }, "post", "update", gasInfo);
         }
 
@@ -193,7 +193,7 @@ namespace BluzelleCSharp
 
 
         /**
-         * <summary>Delete key <paramref name="key" /> from current namespace</summary>
+         * <summary>Delete <paramref name="key" /> from current namespace</summary>
          * <param name="key">Key to delete</param>
          * <param name="gasInfo">Gas specified for transaction execution</param>
          */
@@ -215,11 +215,11 @@ namespace BluzelleCSharp
             await SendTransaction("post", "deleteall", gasInfo);
         }
 
-        
+
         /**
-         * <summary>Rename <paramref name="key"/> into <paramref name="newKey"/> in current namespace</summary>
+         * <summary>Rename <paramref name="key" /> into <paramref name="newKey" /> in current namespace</summary>
          * <param name="key">Key name which to rename</param>
-         * <param name="newKey">New name for <paramref name="key"/></param>
+         * <param name="newKey">New name for <paramref name="key" /></param>
          * <param name="gasInfo">Gas specified for transaction execution</param>
          */
         public async Task Rename(string key, string newKey, GasInfo gasInfo = null)
@@ -231,19 +231,19 @@ namespace BluzelleCSharp
             }, "post", "rename", gasInfo);
         }
 
-        
+
         /**
          * <summary>Renew lease time of a key in current namespace</summary>
          * <param name="key">Key to update</param>
          * <param name="leaseInfo">Lease time to set</param>
          * <param name="gasInfo">Gas specified for transaction execution</param>
          */
-        public async Task Renew(string key, LeaseInfo leaseInfo, GasInfo gasInfo = null)
+        public async Task Renew(string key, LeaseInfo leaseInfo = null, GasInfo gasInfo = null)
         {
             await SendTransaction(new JObject
             {
                 ["Key"] = key,
-                ["Lease"] = leaseInfo.Value
+                ["Lease"] = leaseInfo == null ? "0" : leaseInfo.Value
             }, "post", "renewlease", gasInfo);
         }
 
@@ -252,39 +252,39 @@ namespace BluzelleCSharp
          * <param name="leaseInfo">Lease time to set</param>
          * <param name="gasInfo">Gas specified for transaction execution</param>
          */
-        public async Task RenewAll(LeaseInfo leaseInfo, GasInfo gasInfo = null)
+        public async Task RenewAll(LeaseInfo leaseInfo = null, GasInfo gasInfo = null)
         {
             await SendTransaction(new JObject
             {
-                ["Lease"] = leaseInfo.Value
+                ["Lease"] = leaseInfo == null ? "0" : leaseInfo.Value
             }, "post", "renewleaseall", gasInfo);
         }
 
         /**
-         * <summary>Read value of key <paramref name="id"/></summary>
-         * <param name="id">DB key string</param>
+         * <summary>Read value of <paramref name="key" /></summary>
+         * <param name="key">DB key string</param>
          * <param name="gasInfo">Gas specified for transaction execution</param>
          * <returns>String value</returns>
          */
-        public async Task<string> TxRead(string id, GasInfo gasInfo = null)
+        public async Task<string> TxRead(string key, GasInfo gasInfo = null)
         {
             return (string) (await SendTransaction(new JObject
             {
-                ["Key"] = id
+                ["Key"] = key
             }, "post", "read", gasInfo))["value"];
         }
 
         /**
-         * <summary>Check existence of key <paramref name="id" /></summary>
-         * <param name="id">DB key string</param>
+         * <summary>Check existence of <paramref name="key" /></summary>
+         * <param name="key">DB key string</param>
          * <param name="gasInfo">Gas specified for transaction execution</param>
          * <returns>true if key exists in current namespace</returns>
          */
-        public async Task<bool> TxHas(string id, GasInfo gasInfo = null)
+        public async Task<bool> TxHas(string key, GasInfo gasInfo = null)
         {
             return (bool) (await SendTransaction(new JObject
             {
-                ["Key"] = id
+                ["Key"] = key
             }, "post", "has", gasInfo))["has"];
         }
 
@@ -321,7 +321,7 @@ namespace BluzelleCSharp
         }
 
         /**
-         * <summary>Get lease time of key <paramref name="key" /></summary>
+         * <summary>Get lease time of <paramref name="key" /></summary>
          * <param name="key">DB key string</param>
          * <param name="gasInfo">Gas specified for transaction execution</param>
          * <returns>Lease time in seconds</returns>

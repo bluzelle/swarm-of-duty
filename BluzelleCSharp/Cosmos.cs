@@ -86,7 +86,7 @@ namespace BluzelleCSharp
 
         /**
          * <summary>Executes non-transaction REST API GET query</summary>
-         * <typeparam name="T">Query result format. <see cref="RestSharp.RestClient" /></typeparam>
+         * <typeparam name="T">Query result format wrapped with <see cref="Responce{T}" /></typeparam>
          * <param name="query">Querystring for HTTP. Will be concatenated with endpoint in <see cref="Cosmos" /> constructor</param>
          * <returns>Query result casted to <typeparamref name="T" /></returns>
          */
@@ -103,12 +103,13 @@ namespace BluzelleCSharp
          */
         public async Task<JObject> Query(string query)
         {
-            return await Query<JObject>(query);
+            return await _restClient.GetAsync<JObject>(
+                new RestRequest(UrlEncoder.Default.Encode(query), DataFormat.Json));
         }
 
         /**
          * <summary>
-         *     Executes <see cref="GetAccount" /> query with auto update of <see cref="_sessionAccount" /> and
+         *     Executes <see cref="GetAccount(string)" /> query with auto update of <see cref="_sessionAccount" /> and
          *     <see cref="_sessionSequence" />
          * </summary>
          * <returns>Boolean if account sequence data has updated</returns>
@@ -136,6 +137,11 @@ namespace BluzelleCSharp
         public async Task<Account.AccountData> GetAccount(string address)
         {
             return (await Query<Account>($"auth/accounts/{address}")).Value;
+        }
+
+        public async Task<Account.AccountData> GetAccount()
+        {
+            return (await Query<Account>($"auth/accounts/{_sessionAddress}")).Value;
         }
 
         /**
