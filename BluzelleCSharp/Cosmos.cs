@@ -13,7 +13,6 @@ using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Serialization;
 using RestSharp;
 using RestSharp.Serializers.NewtonsoftJson;
-using Threading;
 using static BluzelleCSharp.Utils.Utils;
 
 namespace BluzelleCSharp
@@ -40,12 +39,12 @@ namespace BluzelleCSharp
 
         private readonly string _sessionAddress;
         private readonly Key _sessionPk;
-
-        private readonly SerialQueue _transactionQueue;
-
+        
         protected readonly string NamespaceId;
         private int _sessionAccount;
         private int _sessionSequence;
+
+        private readonly SerialQueue _transactionQueue;
 
         /**
          * <summary>Initializes Cosmos network API</summary>
