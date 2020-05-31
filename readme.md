@@ -7,13 +7,17 @@ BluzelleC# is a native *.Net Core 3* library that can be used to access the Bluz
 * [Example application](https://github.com/BardinPetr/bluzelle-csharp/tree/master/ExampleApp)
 
 ## Installation
-### Using Nuget 
+### Preparation
+* Install .Net Core 3.1 (https://dotnet.microsoft.com/download)
+* *optional:* Install IDE for C# *(Rider for Linux or Visual Studio for Win/Mac)*
+### Including into project
+#### Using Nuget 
 ```
 dotnet add package Bluzelle
 or
 nuget install Bluzelle
 ```
-### Build from source
+#### Building from source
 ```
 git clone https://github.com/BardinPetr/bluzelle-csharp
 dotnet build
