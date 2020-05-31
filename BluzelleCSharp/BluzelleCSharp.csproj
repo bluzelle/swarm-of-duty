@@ -17,5 +17,10 @@
         <HintPath>lib\SerialQueue.dll</HintPath>
       </Reference>
     </ItemGroup>
+    
+    <PropertyGroup>
+        <IncludeSymbols>true</IncludeSymbols>
+        <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    </PropertyGroup>
 
 </Project>

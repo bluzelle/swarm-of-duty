@@ -24,12 +24,11 @@ namespace BluzelleCSharp
          * <param name="namespaceId">Bluzelle Database Namespace ID</param>
          * <param name="mnemonic">Mnemonic for account in BIP39</param>
          * <param name="address">Account address in Cosmos format. It'll be verified over given mnemonic</param>
-         * <param name="chainId">Database chain ID. For Bluzelle network it equals to "bluzelle"</param>
          * <param name="endpoint">REST API endpoint including protocol and port</param>
          */
-        public BluzelleApi(string namespaceId, string mnemonic, string address, string chainId = "bluzelle",
-            string endpoint = "http://testnet.public.bluzelle.com:1317") : base(namespaceId, mnemonic, address, chainId,
-            endpoint)
+        public BluzelleApi(string namespaceId, string mnemonic, string address,
+            string endpoint = "http://testnet.public.bluzelle.com:1317") : 
+            base(namespaceId, mnemonic, address, "bluzelle", endpoint)
         {
         }
 
