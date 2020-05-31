@@ -5,6 +5,7 @@ BluzelleC# is a native *.Net Core 3* library that can be used to access the Bluz
 
 * [API docs](https://bardinpetr.github.io/bluzelle-csharp/api/index.html)
 * [Example application](https://github.com/BardinPetr/bluzelle-csharp/tree/master/ExampleApp)
+* [Quickstart Video Demo](https://drive.google.com/file/d/1jwpO9U1uuKS51o8UX_ANZsEWOabnseOe/view)
 
 ## Installation
 ### Preparation
@@ -26,6 +27,9 @@ dotnet build
 ## Quickstart
 
 ```c#
+using BluzelleCSharp;
+using BluzelleCSharp.Models;
+
 var bz = new BluzelleApi(
                     "7f346254-2024-496f-bfa3-572a2e87ebd2",
                     "around buzz diagram captain obtain detail salon mango muffin brother morning jeans display attend knife carry green dwarf vendor hungry fan route pumpkin car",
