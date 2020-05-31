@@ -17,16 +17,14 @@
   "build": {
     "content": [
       {
-        "cwd": "../",
         "files": [
-          "docfx_project/api/**.yml",
-          "docfx_project/api/index.md"
+          "api/**.yml",
+          "api/index.md"
         ]
       },
       {
         "files": [
-          "docfx_project/toc.yml",
-          "docfx_project/*.md",
+          "toc.yml",
           "*.md"
         ]
       }
