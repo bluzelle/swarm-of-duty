@@ -1,4 +1,4 @@
-name: CI
+name: Docfx
 
 on:
   push:
@@ -10,6 +10,9 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
+    
+    - name: Copy main page
+      run: cp readme.md docfx_project/index.md
 
     - uses: nikeee/docfx-action@master
       name: Build Documentation

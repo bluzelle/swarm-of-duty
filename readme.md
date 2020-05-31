@@ -3,7 +3,7 @@
 # BluzelleC#
 BluzelleC# is a native *.Net Core 3* library that can be used to access the Bluzelle database service.
 
-* [API docs](https://bardinpetr.github.io/bluzelle-csharp)
+* [API docs](https://bardinpetr.github.io/bluzelle-csharp/api/index.html)
 * [Example application](https://github.com/BardinPetr/bluzelle-csharp/tree/master/ExampleApp)
 
 ## Installation
