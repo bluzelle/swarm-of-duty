@@ -40,6 +40,7 @@ namespace BluzelleCSharp
          * <param name="id">DB key string</param>
          * <param name="prove">Use "pread" of "read" operation</param>
          * <returns>String value</returns>
+         * <exception cref="KeyNotFoundException"></exception>
          */
         public async Task<string> Read(string id, bool prove = false)
         {
