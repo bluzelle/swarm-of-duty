@@ -1,0 +1,30 @@
+<Project Sdk="Microsoft.NET.Sdk">
+    
+    <PropertyGroup>    
+        <PackageId>Bluzelle</PackageId>
+        <Version>1.1.0</Version>
+        <Authors>BardinPetr</Authors>
+
+        <TargetFramework>netcoreapp3.1</TargetFramework>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <PackageReference Include="NBitcoin" Version="5.0.30" />
+      <PackageReference Include="NBitcoin.Secp256k1" Version="1.0.1" />
+      <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
+      <PackageReference Include="RestSharp" Version="106.10.1" />
+      <PackageReference Include="RestSharp.Serializers.NewtonsoftJson" Version="106.10.1" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Reference Include="SerialQueue, Version=1.0.7445.23285, Culture=neutral, PublicKeyToken=null">
+        <HintPath>lib\SerialQueue.dll</HintPath>
+      </Reference>
+    </ItemGroup>
+    
+    <PropertyGroup>
+        <IncludeSymbols>true</IncludeSymbols>
+        <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    </PropertyGroup>
+
+</Project>

@@ -1,0 +1,26 @@
+name: Docfx
+
+on:
+  push:
+    branches: [ master ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    
+    - name: Copy main page
+      run: cp readme.md docfx_project/index.md
+
+    - uses: nikeee/docfx-action@master
+      name: Build Documentation
+      with:
+        args: docfx_project/docfx.json
+
+    - uses: maxheld83/ghpages@master
+      name: Publish Documentation on GitHub Pages
+      env:
+        BUILD_DIR: docfx_project/_site
+        GH_PAT: ${{ secrets.GH_PAT }}

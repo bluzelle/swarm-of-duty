@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BluzelleCSharp", "BluzelleCSharp\BluzelleCSharp.csproj", "{3DA419B0-47B6-41F1-8D2B-04A9CB78BCEE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExampleApp", "ExampleApp\ExampleApp.csproj", "{8E73AF13-68CA-4386-8FE1-FA853A169476}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestAPI", "TestAPI\TestAPI.csproj", "{742CB9AE-920E-43A5-A4D9-2FAD964BDC8F}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{3DA419B0-47B6-41F1-8D2B-04A9CB78BCEE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3DA419B0-47B6-41F1-8D2B-04A9CB78BCEE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3DA419B0-47B6-41F1-8D2B-04A9CB78BCEE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3DA419B0-47B6-41F1-8D2B-04A9CB78BCEE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8E73AF13-68CA-4386-8FE1-FA853A169476}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8E73AF13-68CA-4386-8FE1-FA853A169476}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8E73AF13-68CA-4386-8FE1-FA853A169476}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8E73AF13-68CA-4386-8FE1-FA853A169476}.Release|Any CPU.Build.0 = Release|Any CPU
+		{742CB9AE-920E-43A5-A4D9-2FAD964BDC8F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{742CB9AE-920E-43A5-A4D9-2FAD964BDC8F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{742CB9AE-920E-43A5-A4D9-2FAD964BDC8F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{742CB9AE-920E-43A5-A4D9-2FAD964BDC8F}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
