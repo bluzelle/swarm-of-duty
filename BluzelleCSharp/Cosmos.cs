@@ -4,6 +4,7 @@ using System.Net;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Encodings.Web;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using BluzelleCSharp.Models;
 using BluzelleCSharp.Utils;
@@ -200,6 +201,7 @@ namespace BluzelleCSharp
          * <returns>JObject contains decoded transaction result</returns>
          * <exception cref="Exceptions.InvalidChainIdException"></exception>
          * <exception cref="Exceptions.TransactionExecutionException"></exception>
+         * <exception cref="Exceptions.InsufficientFundsException"></exception>
          * <exception cref="KeyNotFoundException"></exception>
          */
         private async Task<JObject> ExecuteTransaction(
@@ -255,11 +257,15 @@ namespace BluzelleCSharp
             // If transaction result contains "code" field - it is failed - therefore try to decode 
             if (res.ContainsKey("code"))
             {
-                if (res["raw_log"]!.ToString().Contains(KnfErrorMessage)) throw new KeyNotFoundException();
-
+                var err = res["raw_log"]!.ToString();
+                
+                if (err.Contains(KnfErrorMessage)) throw new KeyNotFoundException();
+                if (err.Contains("insufficient funds"))
+                    throw new Exceptions.InsufficientFundsException(
+                        Regex.Match(err, @"\d+ubnt\s\<\s\d+ubnt").Value);
                 // If failed due to invalid sequence ID or due to invalid signature,
                 // wait, retrieve user data again and then re-execute transaction
-                if (!res["raw_log"]!.ToString().Contains(SvfErrorMessage))
+                if (!err.Contains(SvfErrorMessage))
                     throw new Exceptions.TransactionExecutionException(
                         ExtractErrorFromMessage((string) res["raw_log"]));
 

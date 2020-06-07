@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.Encodings.Web;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using BluzelleCSharp.Models;
 using BluzelleCSharp.Utils;
@@ -128,17 +129,25 @@ namespace BluzelleCSharp
          * <param name="value">String value of key</param>
          * <param name="leaseInfo">Lease time for new key</param>
          * <param name="gasInfo">Gas specified for transaction execution</param>
-         * <exception cref="Exceptions.KeyAlreadyFoundException"></exception>
+         * <exception cref="Exceptions.KeyAlreadyExistsException"></exception>
          */
         public async Task Create(string key, string value, LeaseInfo leaseInfo = null, GasInfo gasInfo = null)
         {
-            await SendTransaction(new JObject
+            try
             {
-                ["Key"] = key,
-                ["Value"] = value,
-                ["Lease"] = leaseInfo == null ? "0" : leaseInfo.Value
-            }, "post", "create", gasInfo);
-        }
+                await SendTransaction(new JObject
+                {
+                    ["Key"] = key,
+                    ["Value"] = value,
+                    ["Lease"] = leaseInfo == null ? "0" : leaseInfo.Value
+                }, "post", "create", gasInfo);
+            }
+            catch (Exceptions.TransactionExecutionException ex){
+                if (ex.Message.Contains("already exists")) 
+                    throw new Exceptions.KeyAlreadyExistsException();
+                throw;
+            }
+    }
 
         /**
          * <summary>Update Key's value to <paramref name="value" /> in current namespace</summary>

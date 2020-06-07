@@ -20,13 +20,20 @@ namespace BluzelleCSharp.Utils
         {
         }
 
-        public class KeyAlreadyFoundException : Exception
+        public class KeyAlreadyExistsException : Exception
         {
         }
 
         public class TransactionExecutionException : Exception
         {
             public TransactionExecutionException(string err) : base(err)
+            {
+            }
+        }
+
+        public class InsufficientFundsException : Exception
+        {
+            public InsufficientFundsException(string value) : base(value)
             {
             }
         }
